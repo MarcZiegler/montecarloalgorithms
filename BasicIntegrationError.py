@@ -12,7 +12,7 @@ FUNC = lambda theta: math.sin(theta)
 REALAREA = 2
 INTERVAL = (0, math.pi)
 N = [i*2 for i in range(1, 50)]
-TRIALS = 5
+TRIALS = 10
 
 def MCIntegralError():
     averages, lbounds, ubounds = [], [], []
