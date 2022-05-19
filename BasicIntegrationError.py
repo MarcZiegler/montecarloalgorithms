@@ -11,7 +11,7 @@ SEED = 1337
 FUNC = lambda theta: math.sin(theta)
 REALAREA = 2
 INTERVAL = (0, math.pi)
-N = [i*2 for i in range(1, 50)]
+N = [i*100 for i in range(1, 50)]
 TRIALS = 10
 
 def MCIntegralError():
@@ -76,14 +76,13 @@ if __name__ == '__main__':
 
     # plotting the points
     graph = plt.figure()
-    mcPlot = graph.add_subplot(1,1,1)
-    mcPlot.errorbar(x, ymc, yerr=ymcerror, color='tab:blue', label='MC MSE')
+    mcPlot = graph.add_subplot(1, 1, 1)
+    mcPlot.errorbar(x, ymc, yerr=ymcerror, ecolor='#add8e6', capsize=4.5, elinewidth=3.0, color='tab:blue', label='MC MSE')
     sPlot = graph.add_subplot(1, 1, 1)
     sPlot.plot(x, ys, color='tab:red', label='Simpson MSE')
     sPlot = graph.add_subplot(1, 1, 1)
     sPlot.plot(x, yr, color='tab:green', label='Riemann MSE')
     plt.legend(loc='upper right')
-
     # naming the x axis
     plt.xlabel('Number of subintervals / samples N')
     # naming the y axis
