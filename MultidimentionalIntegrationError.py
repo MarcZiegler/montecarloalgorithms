@@ -10,13 +10,12 @@ import sobol as sob
 #Configuration Variables
 SEED = 1337
 FUNC = lambda input: 1 if math.fsum([math.pow(x, 2) for x in input]) <= 1 else 0
-BASE = 2 #Halton sequence base
 DIM = 6
 SKIP = 0
 REALAREA = math.pow(math.pi, 3)/6 #for hypersphere in 6 DIM
-DOMAIN = (-1, 1) #Cube domain
-N = [i*100 for i in range(1, 10)] #Number of samples
-TRIALS = 10
+DOMAIN = (-1, 1) #Hypercube domain
+N = [i*100 for i in range(20, 30)] #Number of samples
+TRIALS = 1
 
 def GeneratePrimes(n):
     no = n * int(math.log(n) + math.log(math.log(n)))
@@ -40,12 +39,12 @@ def GenerateHaltonGenerator(b):
         yield n / d
 
 def GenerateHaltonSequences(n, k):
-    primes = GeneratePrimes(n + 20) #TODO this behaves weird
+    primes = GeneratePrimes(k + 5) #TODO this behaves weird
     seq = []
-    for i in range(0, n):
+    for i in range(k):
         gen = GenerateHaltonGenerator(primes[i])
-        seq += [[next(gen) for _ in range(k)]]
-    return seq
+        seq += [[next(gen) for _ in range(n)]]
+    return np.transpose(seq) #TODO make this more efficient
 
 def GenerateSobolSequences(n, k):
     return sob.sample(k, n, SKIP)
@@ -62,15 +61,15 @@ def MDMCIntegralError(generator):
         avgSum, maxE, minE = 0.0, 0.0, sys.float_info.max
         for _ in range(TRIALS):
             samples = generator(n, DIM)
-            samples = [FUNC([(DOMAIN[1]-DOMAIN[0])*s for s in nn]) for nn in samples]
+            samples = [FUNC([DOMAIN[0]+(DOMAIN[1]-DOMAIN[0])*s for s in nn]) for nn in samples]
             error = math.fabs(REALAREA - CalculateDomainVolume() * math.fsum(samples) / n)
             avgSum += error
             maxE = max(error, maxE)
             minE = min(error, minE)
         curAvg = avgSum / TRIALS
         averages += [curAvg]
-        lbounds += [curAvg - minE]
-        ubounds += [maxE - curAvg]
+        lbounds += [curAvg - minE] #abs error
+        ubounds += [maxE - curAvg] #abs error
     return averages, [lbounds, ubounds]
 
 def MDRiemannIntegralError():
@@ -103,13 +102,13 @@ if __name__ == '__main__':
     # plotting the points
     graph = plt.figure()
     randomPlot = graph.add_subplot(1, 1, 1)
-    randomPlot.errorbar(x, yrandom, yerr=yrandome, ecolor='yellow', capsize=4.5, elinewidth=3.0, color='tab:green',
+    rebar = randomPlot.errorbar(x, yrandom, yerr=yrandome, ecolor='#82FF56', capsize=2.5, elinewidth=2.0, color='tab:green',
                     label='Random Sampling')
     sobolPlot = graph.add_subplot(1, 1, 1)
-    sobolPlot.errorbar(x, ysobol, yerr=ysobole, ecolor='red', capsize=4.5, elinewidth=3.0, color='tab:red',
+    sobolPlot.errorbar(x, ysobol, yerr=ysobole, ecolor='#FF878E', capsize=2.5, elinewidth=2.0, color='tab:red',
                     label='Sobol Sampling')
     haltonPlot = graph.add_subplot(1, 1, 1)
-    haltonPlot.errorbar(x, yhalton, yerr=yhaltone, ecolor='blue', capsize=4.5, elinewidth=3.0, color='tab:blue',
+    haltonPlot.errorbar(x, yhalton, yerr=yhaltone, ecolor='#62DBFF', capsize=2.5, elinewidth=2.0, color='tab:blue',
                     label='Halton Sampling')
     plt.legend(loc='upper right')
     # naming the x axis
